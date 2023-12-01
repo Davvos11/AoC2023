@@ -17,8 +17,8 @@ pub fn day01() {
     // println!("Part 1: {answer}");
 
     for mut line in input.lines() {
-        let mut first_digit = 0;
-        let mut last_digit = 0;
+        let first_digit;
+        let last_digit;
         loop {
             let parse = word_to_digit(line, false);
             if let Some(digit) = parse.0 {
@@ -55,13 +55,11 @@ fn word_to_digit(input: &str, end: bool) -> (Option<u32>, &str) {
 
     for word in WORDS {
         if end {
-            if input.ends_with(word.0) {
-                return (Some(word.1), &input[..(input.len() - word.0.len())]);
+            if let Some(new_input) = input.strip_suffix(word.0) {
+                return (Some(word.1), new_input);
             }
-        } else {
-            if input.starts_with(word.0) {
-                return (Some(word.1), &input[word.0.len()..]);
-            }
+        } else if let Some(new_input) = input.strip_prefix(word.0) {
+            return (Some(word.1), new_input);
         };
     }
 
@@ -69,13 +67,14 @@ fn word_to_digit(input: &str, end: bool) -> (Option<u32>, &str) {
     if end {
         let last_char = chars.last().unwrap();
         if last_char.is_ascii_digit() {
-            return (Some(last_char.to_digit(10).unwrap()), &input[..(input.len() - 1)]);
+            let suffix = last_char.to_string();
+            return (Some(last_char.to_digit(10).unwrap()), input.strip_suffix(&suffix).unwrap());
         }
-    }
-    else {
+    } else {
         let first_char = chars.first().unwrap();
         if first_char.is_ascii_digit() {
-            return (Some(first_char.to_digit(10).unwrap()), &input[1..]);
+            let prefix = first_char.to_string();
+            return (Some(first_char.to_digit(10).unwrap()), input.strip_prefix(&prefix).unwrap());
         }
     }
 
