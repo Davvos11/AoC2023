@@ -5,7 +5,7 @@ use regex::Regex;
 const GAME: [i32; 3] = [12, 13, 14];
 
 pub fn day02() {
-    let input = read_to_string("static/input02.txt").unwrap();
+    let input = read_to_string("static/input02.txt").expect("Cannot read input file");;
     let id_pattern = Regex::new(r"Game (\d+): ").unwrap();
     let cube_pattern = Regex::new(r"(\d+) (\w+)").unwrap();
 

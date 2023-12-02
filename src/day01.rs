@@ -1,21 +1,23 @@
-use crate::read_file;
+use std::fs::read_to_string;
 
 pub fn day01() {
-    let input = read_file("static/input01.txt");
+    let input = read_to_string("static/input01.txt").expect("Cannot read input file");
 
     let mut answer = 0;
 
-    // for line in input.lines() {
-    //     let digits: Vec<u32> = line.chars()
-    //         .filter(|c| c.is_ascii_digit())
-    //         .map(|c| c.to_digit(10).unwrap())
-    //         .collect();
-    //
-    //     answer += digits.first().unwrap() * 10 + digits.last().unwrap();
-    // }
-    //
-    // println!("Part 1: {answer}");
+    // Part 1
+    for line in input.lines() {
+        let digits: Vec<u32> = line.chars()
+            .filter(|c| c.is_ascii_digit())
+            .map(|c| c.to_digit(10).unwrap())
+            .collect();
 
+        answer += digits.first().unwrap() * 10 + digits.last().unwrap();
+    }
+
+    println!("Part 1: {answer}");
+
+    // Part 2
     for mut line in input.lines() {
         let first_digit;
         let last_digit;
