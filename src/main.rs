@@ -22,17 +22,22 @@ fn main() {
         day = day_arg.trim().parse().expect("Please provide the day as a number")
     }
 
+    let days = [day01, day02];
+
     match day {
         0 => {
-            println!("Day 1:");
-            day01();
-            println!("Day 2:");
-            day02();
+            for (i, day) in days.iter().enumerate() {
+                println!("Day {}:", i + 1);
+                day();
+            }
         }
-        1 => day01(),
-        2 => day02(),
-        _ => {
-            println!("Day not found")
+        num => {
+            println!("Day {}:", num);
+            if let Some(day) = days.get(num - 1) {
+                day();
+            } else {
+                println!("Day not found")
+            }
         }
     }
 }
