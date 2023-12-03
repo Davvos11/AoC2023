@@ -29,18 +29,25 @@ pub fn day03() {
         }
     }
 
-    let mut result = 0;
+    let mut result1 = 0;
+    let mut result2 = 0;
 
     for (y, line) in input.lines().enumerate() {
         for (x, char) in line.chars().enumerate() {
             if !char.is_ascii_digit() && char != '.' {
+                let mut gear_numbers = Vec::new();
                 // Check for adjacent numbers
                 for i in (y - 1)..=(y + 1) {
                     if let Some(numbers_y) = numbers.get_mut(&i) {
                         for j in (x - 1)..=(x + 1) {
                             if let Some(number) = numbers_y.get(&j) {
                                 // Save result
-                                result += number.0;
+                                result1 += number.0;
+                                // If this is a gear, save to gear list
+                                if char == '*' {
+                                    gear_numbers.push(number.0);
+                                }
+
                                 // Remove entry so it does not get summed multiple times
                                 for k in number.1..number.2 {
                                     numbers_y.remove(&k);
@@ -49,9 +56,14 @@ pub fn day03() {
                         }
                     }
                 }
+                // If this is a gear with two part numbers, save result
+                if gear_numbers.len() == 2 {
+                    result2 += gear_numbers.iter().product::<usize>();
+                }
             }
         }
     }
 
-    println!("Part 1: {result}");
+    println!("Part 1: {result1}");
+    println!("Part 2: {result2}");
 }
