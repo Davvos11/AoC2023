@@ -1,7 +1,7 @@
 # Advent of Code 2023
 #### By Davvos11, in Rust
 
-You can use cargo to run a specific day (or all DAYS):
+You can use cargo to run a specific day (or all days):
 
 ```shell
 # Run a specific day:
