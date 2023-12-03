@@ -2,10 +2,13 @@ use std::{env, io};
 use std::time::Instant;
 use crate::day01::day01;
 use crate::day02::day02;
+use crate::day03::day03;
 
 mod day01;
 mod day02;
 mod day03;
+
+const DAYS: [fn(); 3] = [day01, day02, day03];
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -24,22 +27,20 @@ fn main() {
         day = day_arg.trim();
     }
 
-    let days = [day01, day02];
-
     match day {
         "a" => {
-            for (i, day) in days.iter().enumerate() {
+            for (i, day) in DAYS.iter().enumerate() {
                 run_day(day, i + 1);
             }
         }
         "0" => {
-            if let Some(day) = days.last() {
-                run_day(day, days.len());
+            if let Some(day) = DAYS.last() {
+                run_day(day, DAYS.len());
             }
         }
         num => {
             let num: usize = num.parse().expect("Please provide the day as a number, '0' for latest or 'a' for all");
-            if let Some(day) = days.get(num - 1) {
+            if let Some(day) = DAYS.get(num - 1) {
                 run_day(day, num);
             } else {
                 println!("Day not found")
@@ -49,8 +50,8 @@ fn main() {
 }
 
 fn run_day(day: &fn(), num: usize) {
-    println!("---    Day {num:2}:    ---");
+    println!("---    Day {num:2}:     ---");
     let start = Instant::now();
     day();
-    println!("--- Time: {:.2?} ---\n", start.elapsed());
+    println!("--- Time: {:3.2?} ---\n", start.elapsed());
 }
