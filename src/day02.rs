@@ -50,7 +50,7 @@ pub fn day02() {
         if possble {
             result_01 += id;
         }
-        result_02 += minimum.iter().fold(1, |acc, &x| acc * x);
+        result_02 += minimum.iter().product::<i32>();
     }
 
     println!("Part 1: {result_01}\nPart 2: {result_02}");
