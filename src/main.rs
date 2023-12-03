@@ -1,9 +1,11 @@
 use std::{env, io};
+use std::time::Instant;
 use crate::day01::day01;
 use crate::day02::day02;
 
 mod day01;
 mod day02;
+mod day03;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -27,21 +29,18 @@ fn main() {
     match day {
         "a" => {
             for (i, day) in days.iter().enumerate() {
-                println!("Day {}:", i + 1);
-                day();
+                run_day(day, i + 1);
             }
         }
         "0" => {
             if let Some(day) = days.last() {
-                println!("Day {}:", days.len());
-                day();
+                run_day(day, days.len());
             }
         }
         num => {
             let num: usize = num.parse().expect("Please provide the day as a number, '0' for latest or 'a' for all");
-            println!("Day {}:", num);
             if let Some(day) = days.get(num - 1) {
-                day();
+                run_day(day, num);
             } else {
                 println!("Day not found")
             }
@@ -49,3 +48,9 @@ fn main() {
     }
 }
 
+fn run_day(day: &fn(), num: usize) {
+    println!("---    Day {num:2}:    ---");
+    let start = Instant::now();
+    day();
+    println!("--- Time: {:.2?} ---\n", start.elapsed());
+}
