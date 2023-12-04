@@ -3,22 +3,19 @@ use std::fs::read_to_string;
 pub fn day01() {
     let input = read_to_string("static/input01.txt").expect("Cannot read input file");
 
-    let mut answer = 0;
+    let mut result1 = 0;
+    let mut result2 = 0;
 
-    // Part 1
-    for line in input.lines() {
+    for mut line in input.lines() {
+        // Part 1
         let digits: Vec<u32> = line.chars()
             .filter(|c| c.is_ascii_digit())
             .map(|c| c.to_digit(10).unwrap())
             .collect();
 
-        answer += digits.first().unwrap() * 10 + digits.last().unwrap();
-    }
+        result1 += digits.first().unwrap() * 10 + digits.last().unwrap();
 
-    println!("Part 1: {answer}");
-
-    // Part 2
-    for mut line in input.lines() {
+        // Part 2
         let first_digit;
         let last_digit;
         loop {
@@ -43,10 +40,11 @@ pub fn day01() {
             line = parse.1;
         }
 
-        answer += first_digit * 10 + last_digit;
+        result2 += first_digit * 10 + last_digit;
     }
 
-    println!("Part 2: {answer}")
+    println!("Part 1: {result1}");
+    println!("Part 2: {result2}")
 }
 
 const WORDS: [(&str, u32); 9] =
