@@ -8,12 +8,12 @@ pub fn day04() {
     let mut copies = HashMap::new();
 
     for line  in input.lines() {
-        let parts: Vec<&str> = line.split(|c| c == ':' || c == '|')
-            .map(|s|s.trim())
-            .collect();
-        let card_number: usize = get_card_num(parts[0]);
-        let winning_nums= string_to_int_set(parts[1]);
-        let nums = string_to_int_set(parts[2]);
+        let left = line.split(':').next().unwrap();
+        let mut right = line.strip_prefix(left).unwrap()[2..].split('|');
+
+        let card_number: usize = get_card_num(left);
+        let winning_nums= string_to_int_set(right.next().unwrap());
+        let nums = string_to_int_set(right.next().unwrap());
 
         let wins = winning_nums.intersection(&nums).count();
         if wins > 0 {
