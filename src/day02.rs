@@ -1,11 +1,8 @@
-use std::fs::read_to_string;
 
 // (r,g,b)
 const GAME: [usize; 3] = [12, 13, 14];
 
-pub fn day02() {
-    let input = read_to_string("static/input02.txt").expect("Cannot read input file");
-
+pub fn day02(input: &str) -> (i32, i32) {
     let mut result_01 = 0;
     let mut result_02 = 0;
 
@@ -46,7 +43,7 @@ pub fn day02() {
         result_02 += minimum.iter().product::<usize>();
     }
 
-    println!("Part 1: {result_01}\nPart 2: {result_02}");
+    (result_01 as i32, result_02 as i32)
 }
 
 fn get_game_num(string: &str) -> usize {

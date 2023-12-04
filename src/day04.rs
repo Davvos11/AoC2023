@@ -1,10 +1,6 @@
 use std::collections::HashSet;
-use std::fs::read_to_string;
 
-pub fn day04() {
-    let input = read_to_string("static/input04.txt").expect("Cannot read input file");
-    let input = input.trim();
-
+pub fn day04(input: &str) -> (i32, i32) {
     let mut result1 = 0;
     let mut copies = vec![1_usize; input.lines().count()];
 
@@ -30,8 +26,7 @@ pub fn day04() {
 
     let result2: usize = copies.iter().sum();
 
-    println!("Part 1: {result1}");
-    println!("Part 2: {result2}");
+    (result1 as i32, result2 as i32)
 }
 
 fn string_to_int_set(string: &str) -> impl Iterator<Item = usize> + '_ {

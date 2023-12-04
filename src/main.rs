@@ -1,4 +1,5 @@
 use std::{env, io};
+use std::fs::read_to_string;
 use std::time::Instant;
 use crate::day01::day01;
 use crate::day02::day02;
@@ -10,7 +11,14 @@ mod day02;
 mod day03;
 mod day04;
 
-const DAYS: [fn(); 4] = [day01, day02, day03, day04];
+type Day = (fn(&str) -> (i32, i32), &'static str);
+
+const DAYS: [Day; 4] = [
+    (day01, "static/input01.txt"),
+    (day02, "static/input02.txt"),
+    (day03, "static/input03.txt"),
+    (day04, "static/input04.txt"),
+];
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -51,9 +59,12 @@ fn main() {
     }
 }
 
-fn run_day(day: &fn(), num: usize) {
+fn run_day(day: &Day, num: usize) {
     println!("---    Day {num:2}:     ---");
+    let input = read_to_string(day.1).expect("Could not read input file");
     let start = Instant::now();
-    day();
+    let (result1, result2) = day.0(&input);
+    println!("Part 1: {result1}");
+    println!("Part 2: {result2}");
     println!("--- Time: {:3.2?} ---\n", start.elapsed());
 }

@@ -1,8 +1,5 @@
-use std::fs::read_to_string;
 
-pub fn day01() {
-    let input = read_to_string("static/input01.txt").expect("Cannot read input file");
-
+pub fn day01(input: &str) -> (i32, i32) {
     let mut result1 = 0;
     let mut result2 = 0;
 
@@ -43,8 +40,7 @@ pub fn day01() {
         result2 += first_digit * 10 + last_digit;
     }
 
-    println!("Part 1: {result1}");
-    println!("Part 2: {result2}")
+    (result1 as i32, result2 as i32)
 }
 
 const WORDS: [(&str, u32); 9] =

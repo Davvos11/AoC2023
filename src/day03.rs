@@ -1,8 +1,6 @@
 use std::collections::HashMap;
-use std::fs::read_to_string;
 
-pub fn day03() {
-    let input = read_to_string("static/input03.txt").expect("Cannot read input file");
+pub fn day03(input: &str) -> (i32, i32) {
     // numbers[y][x] = (number, start_x, end_x)
     let mut numbers: HashMap<usize, HashMap<usize, (usize, usize, usize)>> = HashMap::new();
 
@@ -64,6 +62,5 @@ pub fn day03() {
         }
     }
 
-    println!("Part 1: {result1}");
-    println!("Part 2: {result2}");
+    (result1 as i32, result2 as i32)
 }
