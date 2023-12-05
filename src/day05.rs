@@ -64,8 +64,6 @@ fn part02(input: &str) -> isize {
         }
     }
 
-    // dbg!(&source_ranges);
-
     for section in sections {
         let mut lines = section.lines();
         // Assuming that the category maps are given in order, so no need to do anything with the title
@@ -81,16 +79,16 @@ fn part02(input: &str) -> isize {
             let src_ins_range = start_len_to_range(src_ins_start, ins_len);
 
             for src_range in source_ranges.clone() {
-                let intersection = range_intersection(src_range, src_ins_range);
+                let int_diff = range_intersect_difference(src_range, src_ins_range);
                 // If our source is (partly) in the range of the instructions:
-                if let Some(intersection) = intersection {
+                if let Some((intersection, differences)) = int_diff {
                     // Save mapped destination range
                     let shift = dst_ins_start - src_ins_start;
                     dest_ranges.insert(shift_range(intersection, shift));
                     // Remove from original list
                     source_ranges.remove(&src_range);
                     // Save differences (ranges outside the instruction range) (if any) to list
-                    for difference in range_difference(src_range, src_ins_range) {
+                    for difference in differences {
                         source_ranges.insert(difference);
                     }
                 }
@@ -99,8 +97,6 @@ fn part02(input: &str) -> isize {
 
         // Move to next iteration
         source_ranges = source_ranges.union(&dest_ranges).cloned().collect();
-
-        // dbg!(&source_ranges);
     }
 
     // Get range with lowest start value
@@ -111,38 +107,38 @@ fn start_len_to_range<T: Add<Output = T> + Copy>(start: T, len: T) -> (T, T) {
     (start, start + len)
 }
 
-fn range_intersection<T: Ord + Copy>(range1: (T, T), range2: (T,T)) -> Option<(T, T)> {
-    let max_start = range1.0.max(range2.0);
-    let min_end = range1.1.min(range2.1);
-
-    if max_start <= min_end {
-        Some((max_start, min_end))
-    } else {
-        None
-    }
-}
-
-fn range_difference<T: Ord + Copy>(range1: (T, T), range2: (T,T)) -> Vec<(T, T)> {
-    let mut result = Vec::new();
+fn range_intersect_difference<T: Ord + Copy>(range1: (T, T), range2: (T, T)) -> Option<((T, T), Vec<(T, T)>)> {
+    let mut difference = Vec::new();
+    let mut intersection = None;
 
     // Check if range1 is entirely before range2
     // or if range1 is entirely after range2
     if range1.1 <= range2.0 || range1.0 >= range2.1 {
-        result.push((range1.0, range1.1));
+        difference.push((range1.0, range1.1));
     }
     // Range1 partially overlaps with range2
     else {
         // Add the portion before the overlap
         if range1.0 < range2.0 {
-            result.push((range1.0, range2.0));
+            difference.push((range1.0, range2.0));
         }
         // Add the portion after the overlap
         if range1.1 > range2.1 {
-            result.push((range2.1, range1.1));
+            difference.push((range2.1, range1.1));
         }
+
+        // Calculate and store the intersection
+        let start = range1.0.max(range2.0);
+        let end = range1.1.min(range2.1);
+
+        intersection = Some((start, end));
     }
 
-    result
+    // If there is an intersection, return intersection and difference
+    // Otherwise return None
+    intersection.map(|int|{
+        (int, difference)
+    })
 }
 
 fn shift_range<T: Add<Output = T> + Copy>(range: (T, T), shift: T) -> (T, T) {
