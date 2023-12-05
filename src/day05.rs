@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use std::ops::Add;
 use crate::utils::parse_spaced_string;
 
 pub fn day05(input: &str) -> (i32, i32) {
@@ -51,39 +52,99 @@ fn part02(input: &str) -> isize {
     let mut sections = input.split("\n\n");
 
     // Read seeds (= sources) from first line
-    let mut sources: HashSet<isize> = parse_spaced_string(
+    let mut sources = parse_spaced_string::<isize>(
         sections.next().unwrap().strip_prefix("seeds: ").unwrap()
-    ).collect();
+    );
+
+    // Parse into tuples
+    let mut source_ranges = HashSet::new();
+    while let Some(first) = sources.next() {
+        if let Some(second) = sources.next() {
+            source_ranges.insert((first, second + first));
+        }
+    }
+
+    // dbg!(&source_ranges);
 
     for section in sections {
         let mut lines = section.lines();
         // Assuming that the category maps are given in order, so no need to do anything with the title
         let _title = lines.next().unwrap();
 
-        let mut destinations = HashSet::new();
+        let mut dest_ranges = HashSet::new();
 
         for line in lines {
             let instructions: Vec<isize> = parse_spaced_string(line).collect();
-            let [dest_start, source_start, len] = instructions[..] else { panic!("Could not parse") };
+            let [dst_ins_start, src_ins_start, ins_len]
+                = instructions[..] else { panic!("Could not parse") };
 
-            let mut mapped_sources = HashSet::new();
+            let src_ins_range = start_len_to_range(src_ins_start, ins_len);
 
-            // If one of the ranges includes one of our sources, save the destination
-            for source in sources.clone() {
-                let difference = source - source_start;
-                if difference > 0 && difference < len {
-                    destinations.insert(dest_start + difference);
-                    mapped_sources.insert(source);
+            for src_range in source_ranges.clone() {
+                let intersection = range_intersection(src_range, src_ins_range);
+                // If our source is (partly) in the range of the instructions:
+                if let Some(intersection) = intersection {
+                    // Save mapped destination range
+                    let shift = dst_ins_start - src_ins_start;
+                    dest_ranges.insert(shift_range(intersection, shift));
+                    // Remove from original list
+                    source_ranges.remove(&src_range);
+                    // Save differences (ranges outside the instruction range) (if any) to list
+                    for difference in range_difference(src_range, src_ins_range) {
+                        source_ranges.insert(difference);
+                    }
                 }
             }
-
-            sources = sources.difference(&mapped_sources).cloned().collect();
         }
 
-        // Add all sources that haven't been mapped to a new destination and
-        // move the new set to sources set for next iteration
-        sources = sources.union(&destinations).cloned().collect();
+        // Move to next iteration
+        source_ranges = source_ranges.union(&dest_ranges).cloned().collect();
+
+        // dbg!(&source_ranges);
     }
 
-    *sources.iter().min().unwrap()
+    // Get range with lowest start value
+    *source_ranges.iter().map(|(start, _end)|start).min().unwrap()
+}
+
+fn start_len_to_range<T: Add<Output = T> + Copy>(start: T, len: T) -> (T, T) {
+    (start, start + len)
+}
+
+fn range_intersection<T: Ord + Copy>(range1: (T, T), range2: (T,T)) -> Option<(T, T)> {
+    let max_start = range1.0.max(range2.0);
+    let min_end = range1.1.min(range2.1);
+
+    if max_start <= min_end {
+        Some((max_start, min_end))
+    } else {
+        None
+    }
+}
+
+fn range_difference<T: Ord + Copy>(range1: (T, T), range2: (T,T)) -> Vec<(T, T)> {
+    let mut result = Vec::new();
+
+    // Check if range1 is entirely before range2
+    // or if range1 is entirely after range2
+    if range1.1 <= range2.0 || range1.0 >= range2.1 {
+        result.push((range1.0, range1.1));
+    }
+    // Range1 partially overlaps with range2
+    else {
+        // Add the portion before the overlap
+        if range1.0 < range2.0 {
+            result.push((range1.0, range2.0));
+        }
+        // Add the portion after the overlap
+        if range1.1 > range2.1 {
+            result.push((range2.1, range1.1));
+        }
+    }
+
+    result
+}
+
+fn shift_range<T: Add<Output = T> + Copy>(range: (T, T), shift: T) -> (T, T) {
+    (range.0 + shift, range.1 + shift)
 }
