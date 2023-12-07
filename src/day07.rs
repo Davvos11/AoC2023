@@ -47,24 +47,23 @@ fn rank_hand(hand: &Chars, part: &Part) -> u32 {
             *map.entry(card).or_insert(0) += 1;
             map
         });
-    // Get the amount of jokers
-    let joker_count = *cards_counted.get(&'J').unwrap_or(&0);
-    // Remove joker so it will not be counted as the max card later
+
     if *part == Part::Two {
+        // Get the amount of jokers
+        let joker_count = *cards_counted.get(&'J').unwrap_or(&0);
+        // Remove joker so it will not be counted as the max card later
         cards_counted.remove(&'J');
+        // Add joker count to the highest card
+        if let Some((&max_card, _)) = cards_counted.iter().max_by_key(|&(_, count)| count) {
+            *cards_counted.entry(max_card).or_insert(0) += joker_count;
+        }
     }
 
     // Get the maximum number of one card in this hand
-    let mut max_count = *cards_counted.values()
-        .max().unwrap_or(&0);
+    let max_count = *cards_counted.values()
+        .max().unwrap_or(&5); // 'or' is the case of 5 Jokers (that are now removed from the list)
     // Get the number of unique cards
-    let mut unique_cards_count = cards_counted.len();
-
-    // Use joker as highest card
-    if *part == Part::Two && joker_count > 0 {
-        max_count += joker_count;
-        unique_cards_count -= 1;
-    }
+    let unique_cards_count = cards_counted.len();
 
     match max_count {
         5 => 7, // Five of a kind
