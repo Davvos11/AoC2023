@@ -15,21 +15,8 @@ pub fn day07(input: &str) -> (i32, i32) {
     hands.sort_by(|(hand_a, _), (hand_b, _)| cmp_hand(hand_a, hand_b));
 
     // Loop through sorted hands (from worst to best) and calculate the rank
-    let mut previous_hand: Option<Chars> = None;
-    let mut current_rank = 0;
-
-    for (hand, bid) in hands {
-        if let Some(previous_hand) = previous_hand {
-            if let Ordering::Equal = cmp_hand(&previous_hand, &hand) {
-            } else {
-                current_rank += 1;
-            }
-        } else {
-            current_rank += 1;
-        };
-
-        result1 += bid * current_rank;
-        previous_hand = Some(hand);
+    for (i, &(_, bid)) in hands.iter().enumerate() {
+        result1 += (i+1) * bid as usize;
     }
 
     // dbg!(hands);
