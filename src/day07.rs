@@ -9,15 +9,15 @@ pub fn day07(input: &str) -> (i32, i32) {
         (hand.chars(), bid.parse().unwrap())
     }).collect();
 
-    let result1 = calculate_winnings(&mut hands, false);
-    let result2 = calculate_winnings(&mut hands, true);
+    let result1 = calculate_winnings(&mut hands, &Part::One);
+    let result2 = calculate_winnings(&mut hands, &Part::Two);
 
     (result1 as i32, result2 as i32)
 }
 
-fn calculate_winnings(hands: &mut [(Chars, u32)], part_two: bool) -> usize {
+fn calculate_winnings(hands: &mut [(Chars, u32)], part: &Part) -> usize {
     // Sort hands
-    hands.sort_by(|(hand_a, _), (hand_b, _)| cmp_hand(hand_a, hand_b, part_two));
+    hands.sort_by(|(hand_a, _), (hand_b, _)| cmp_hand(hand_a, hand_b, part));
 
     // Loop through sorted hands (from worst to best) and calculate the rank
     hands.iter().enumerate().map(|(i, &(_, bid))| {
@@ -25,19 +25,22 @@ fn calculate_winnings(hands: &mut [(Chars, u32)], part_two: bool) -> usize {
     }).sum()
 }
 
-const CARD_ORDER: [char; 13] = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
+const CARD_ORDER1: [char; 13] = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
 const CARD_ORDER2: [char; 13] = ['A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J'];
 
-fn cmp_hand(hand1: &Chars, hand2: &Chars, part_two: bool) -> Ordering {
-    match rank_hand(hand1, part_two).cmp(&rank_hand(hand2, part_two)) {
+#[derive(PartialEq)]
+enum Part { One, Two }
+
+fn cmp_hand(hand1: &Chars, hand2: &Chars, part: &Part) -> Ordering {
+    match rank_hand(hand1, part).cmp(&rank_hand(hand2, part)) {
         // If equal, compare the highest cards
-        Ordering::Equal => cmp_draw(hand1, hand2, part_two),
+        Ordering::Equal => cmp_draw(hand1, hand2, part),
         // If greater or smaller, just return
         ordering => ordering,
     }
 }
 
-fn rank_hand(hand: &Chars, part_two: bool) -> u32 {
+fn rank_hand(hand: &Chars, part: &Part) -> u32 {
     // Count the cards
     let cards_counted =
         hand.clone().fold(HashMap::new(), |mut map, card| {
@@ -47,7 +50,7 @@ fn rank_hand(hand: &Chars, part_two: bool) -> u32 {
     // Get the maximum number of one card in this hand
     let max_count = cards_counted.iter()
         // If this is part 2, ignore the joker in this
-        .filter(|(&card, _)| !part_two || card != 'J')
+        .filter(|(&card, _)| *part == Part::One || card != 'J')
         .map(|(_, &count)| count)
         .max().unwrap_or(0);
     let mut max_count = max_count;
@@ -57,7 +60,7 @@ fn rank_hand(hand: &Chars, part_two: bool) -> u32 {
     let joker_count = *cards_counted.get(&'J').unwrap_or(&0);
 
     // Use joker as highest card
-    if part_two && joker_count > 0 {
+    if *part == Part::Two && joker_count > 0 {
         max_count += joker_count;
         unique_cards_count -= 1;
     }
@@ -78,8 +81,11 @@ fn rank_hand(hand: &Chars, part_two: bool) -> u32 {
     }
 }
 
-fn cmp_draw(hand1: &Chars, hand2: &Chars, part_two: bool) -> Ordering {
-    let order = if part_two { CARD_ORDER2 } else { CARD_ORDER };
+fn cmp_draw(hand1: &Chars, hand2: &Chars, part: &Part) -> Ordering {
+    let order = match part {
+        Part::One => CARD_ORDER1,
+        Part::Two => CARD_ORDER2,
+    };
     // Map cards to a number (lower = better)
     let hand1 = hand1.clone().map(|card| order.iter().position(|&x| x == card));
     let hand2 = hand2.clone().map(|card| order.iter().position(|&x| x == card));
