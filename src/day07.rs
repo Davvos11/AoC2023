@@ -42,22 +42,23 @@ fn cmp_hand(hand1: &Chars, hand2: &Chars, part: &Part) -> Ordering {
 
 fn rank_hand(hand: &Chars, part: &Part) -> u32 {
     // Count the cards
-    let cards_counted =
+    let mut cards_counted =
         hand.clone().fold(HashMap::new(), |mut map, card| {
             *map.entry(card).or_insert(0) += 1;
             map
         });
-    // Get the maximum number of one card in this hand
-    let max_count = cards_counted.iter()
-        // If this is part 2, ignore the joker in this
-        .filter(|(&card, _)| *part == Part::One || card != 'J')
-        .map(|(_, &count)| count)
-        .max().unwrap_or(0);
-    let mut max_count = max_count;
-    // Get the number of unique cards
-    let mut unique_cards_count = cards_counted.len();
     // Get the amount of jokers
     let joker_count = *cards_counted.get(&'J').unwrap_or(&0);
+    // Remove joker so it will not be counted as the max card later
+    if *part == Part::Two {
+        cards_counted.remove(&'J');
+    }
+
+    // Get the maximum number of one card in this hand
+    let mut max_count = *cards_counted.values()
+        .max().unwrap_or(&0);
+    // Get the number of unique cards
+    let mut unique_cards_count = cards_counted.len();
 
     // Use joker as highest card
     if *part == Part::Two && joker_count > 0 {
