@@ -2,8 +2,8 @@ use std::collections::HashSet;
 use std::ops::Add;
 use crate::utils::parse_spaced_string;
 
-pub fn day05(input: &str) -> (i32, i32) {
-    (part01(input) as i32, part02(input) as i32)
+pub fn day05(input: &str) -> (isize, isize) {
+    (part01(input), part02(input))
 }
 
 fn part01(input: &str) -> isize {

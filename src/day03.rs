@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-pub fn day03(input: &str) -> (i32, i32) {
+pub fn day03(input: &str) -> (isize, isize) {
     // numbers[y][x] = (number, start_x, end_x)
     let mut numbers: HashMap<usize, HashMap<usize, (usize, usize, usize)>> = HashMap::new();
 
@@ -62,5 +62,5 @@ pub fn day03(input: &str) -> (i32, i32) {
         }
     }
 
-    (result1 as i32, result2 as i32)
+    (result1 as isize, result2 as isize)
 }

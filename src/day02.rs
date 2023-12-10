@@ -2,7 +2,7 @@
 // (r,g,b)
 const GAME: [usize; 3] = [12, 13, 14];
 
-pub fn day02(input: &str) -> (i32, i32) {
+pub fn day02(input: &str) -> (isize, isize) {
     let mut result_01 = 0;
     let mut result_02 = 0;
 
@@ -43,7 +43,7 @@ pub fn day02(input: &str) -> (i32, i32) {
         result_02 += minimum.iter().product::<usize>();
     }
 
-    (result_01 as i32, result_02 as i32)
+    (result_01 as isize, result_02 as isize)
 }
 
 fn get_game_num(string: &str) -> usize {

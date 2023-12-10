@@ -20,7 +20,7 @@ mod day06;
 mod day07;
 mod day08;
 
-type Day = (fn(&str) -> (i32, i32), &'static str);
+type Day = (fn(&str) -> (isize, isize), &'static str);
 
 const DAYS: [Day; 8] = [
     (day01, "static/input01.txt"),

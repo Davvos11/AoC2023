@@ -1,6 +1,6 @@
 use crate::utils::parse_spaced_string;
 
-pub fn day06(input: &str) -> (i32, i32) {
+pub fn day06(input: &str) -> (isize, isize) {
     // Part 1:
     let mut lines = input.lines();
     let times = parse_spaced_string(lines.next().unwrap());
@@ -16,7 +16,7 @@ pub fn day06(input: &str) -> (i32, i32) {
 
     let result2 = calculate_race(time, record);
 
-    (result1 as i32, result2 as i32)
+    (result1 as isize, result2 as isize)
 }
 
 // Naive / iterative approach

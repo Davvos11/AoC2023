@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::str::Chars;
 
-pub fn day07(input: &str) -> (i32, i32) {
+pub fn day07(input: &str) -> (isize, isize) {
     // Parse hands
     let mut hands: Vec<(Chars, u32)> = input.lines().map(|line| {
         let [hand, bid] = line.split_whitespace().collect::<Vec<&str>>()[..] else { panic!("Parse error") };
@@ -12,7 +12,7 @@ pub fn day07(input: &str) -> (i32, i32) {
     let result1 = calculate_winnings(&mut hands, &Part::One);
     let result2 = calculate_winnings(&mut hands, &Part::Two);
 
-    (result1 as i32, result2 as i32)
+    (result1 as isize, result2 as isize)
 }
 
 fn calculate_winnings(hands: &mut [(Chars, u32)], part: &Part) -> usize {

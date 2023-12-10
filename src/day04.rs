@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-pub fn day04(input: &str) -> (i32, i32) {
+pub fn day04(input: &str) -> (isize, isize) {
     let mut result1 = 0;
     let mut copies = vec![1_usize; input.lines().count()];
 
@@ -26,7 +26,7 @@ pub fn day04(input: &str) -> (i32, i32) {
 
     let result2: usize = copies.iter().sum();
 
-    (result1 as i32, result2 as i32)
+    (result1 as isize, result2 as isize)
 }
 
 fn string_to_int_set(string: &str) -> impl Iterator<Item = usize> + '_ {

@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::fmt::{Debug, Formatter};
 use std::rc::Rc;
 
-pub fn day08(input: &str) -> (i32, i32) {
+pub fn day08(input: &str) -> (isize, isize) {
     let mut lines = input.lines();
     // Get LR instructions
     let instructions = lines.next().unwrap();

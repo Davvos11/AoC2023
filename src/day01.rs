@@ -1,5 +1,5 @@
 
-pub fn day01(input: &str) -> (i32, i32) {
+pub fn day01(input: &str) -> (isize, isize) {
     let mut result1 = 0;
     let mut result2 = 0;
 
@@ -40,7 +40,7 @@ pub fn day01(input: &str) -> (i32, i32) {
         result2 += first_digit * 10 + last_digit;
     }
 
-    (result1 as i32, result2 as i32)
+    (result1 as isize, result2 as isize)
 }
 
 const WORDS: [(&str, u32); 9] =
