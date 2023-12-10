@@ -1,4 +1,4 @@
-pub fn dayxx(input: &str) -> (i32, i32) {
+pub fn dayxx(input: &str) -> (isize, isize) {
     let result1 = 0;
     let result2 = 0;
     
