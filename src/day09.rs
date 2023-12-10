@@ -2,7 +2,7 @@ use crate::utils::parse_spaced_string;
 
 pub fn day09(input: &str) -> (isize, isize) {
     let mut result1 = 0;
-    let result2 = 0;
+    let mut result2 = 0;
 
     for line in input.lines() {
         // Construct stack of differences between each layer
@@ -27,14 +27,17 @@ pub fn day09(input: &str) -> (isize, isize) {
         // Extrapolate last value for each layer
         let mut previous_list = stack.pop().unwrap();
         while let Some(mut list) = stack.pop() {
-            let new_value = list.last().unwrap() + previous_list.last().unwrap();
-            list.push(new_value);
+            let new_end_value = list.last().unwrap() + previous_list.last().unwrap();
+            let new_start_value = list.first().unwrap() - previous_list.first().unwrap();
+            list.push(new_end_value);
+            list.insert(0, new_start_value);
             previous_list = list;
         }
 
         // Get new extrapolated value
         result1 += previous_list.last().unwrap();
+        result2 += previous_list.first().unwrap();
     }
 
-    (result1 as isize, result2)
+    (result1 as isize, result2 as isize)
 }
