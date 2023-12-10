@@ -12,10 +12,12 @@ pub fn day08(input: &str) -> (isize, isize) {
 
     // Parse nodes
     let mut nodes: HashMap<&str, Rc<RefCell<Node>>> = HashMap::new();
-    let mut start = None;
+    let mut start_1 = None;
+    let mut start_2 = Vec::new();
 
     for line in lines {
         let (title, left_title, right_title) = parse_line(line);
+        // TODO make this less ugly
         // Get left and right nodes if already constructed, otherwise create new
         let left = Rc::clone(nodes.entry(left_title)
             .or_insert(Rc::new(RefCell::new(Node::new(left_title)))));
@@ -26,35 +28,81 @@ pub fn day08(input: &str) -> (isize, isize) {
             .or_insert(Rc::new(RefCell::new(Node::new(title)))));
         node.borrow_mut().set_children(&left, &right);
         // Check if this is our start
-        if start.is_none() && title == "AAA" {
-            start = Some(node);
+        if start_1.is_none() && title == "AAA" {
+            start_1 = Some(Rc::clone(&node));
+        }
+        if title.ends_with('A') {
+            start_2.push(node);
         }
     }
 
-    let mut node = start.unwrap();
-    let mut result1 = 0;
+    let instructions = instructions.chars().cycle();
 
+    // Part 1:
+    let mut result1 = None;
+    let mut node = start_1.clone().unwrap();
     // Loop over instructions
-    for (i, instruction) in instructions.chars().cycle().enumerate() {
-        let current = Rc::clone(&node);
-        // let mut next = None;
-        match instruction {
-            'R' => { node = current.borrow().right.clone().unwrap() }
-            'L' => { node = current.borrow().left.clone().unwrap() }
-            _ => panic!("Parse error"),
-        };
+    for (i, instruction) in instructions.clone().enumerate() {
+        node = get_next(instruction, &node);
+
         if node.borrow().title == "ZZZ" {
-            result1 = i + 1;
-            break
+            result1 = Some(i + 1);
+            break;
         }
     }
 
 
-    let result2 = 0;
+    // Part 2:
+    // Follow instructions until you find an end node
+    // from looking at the example and real data, the end locations will loop
+    // i.e. if the first end is at 12, the second will be at 24, then 36, etc.
+    let intervals: Vec<_> = start_2.iter().map(|node| {
+        let mut node = Rc::clone(node);
+        let mut end_interval = 0;
+        for (i, instruction) in instructions.clone().enumerate() {
+            node = get_next(instruction, &node);
+            if node.borrow().is_end {
+                end_interval = i+1;
+                break;
+            }
+        }
+        end_interval
+    }).collect();
 
-    (result1 as i32, result2)
+    let result2 = find_lcm(&intervals).unwrap();
+
+    (result1.unwrap_or(0) as i32 as isize, result2 as isize)
 }
 
+fn get_next(instruction: char, node: &Rc<RefCell<Node>>) -> Rc<RefCell<Node>> {
+    let node = Rc::clone(node);
+    match instruction {
+        'R' => { node.borrow().right.clone().unwrap() }
+        'L' => { node.borrow().left.clone().unwrap() }
+        _ => panic!("Parse error"),
+    }
+}
+
+
+fn find_lcm(numbers: &[usize]) -> Option<usize> {
+    if numbers.is_empty() {
+        return None;
+    }
+    let mut lcm = numbers[0];
+    for &num in &numbers[1..] {
+        lcm = lcm * num / gcd(lcm, num);
+    }
+    Some(lcm)
+}
+
+fn gcd(mut a: usize, mut b: usize) -> usize {
+    while b != 0 {
+        let temp = b;
+        b = a % b;
+        a = temp;
+    }
+    a
+}
 fn parse_line(line: &str) -> (&str, &str, &str) {
     let mut split = line.split_ascii_whitespace();
     let title = split.next().unwrap();
@@ -68,13 +116,14 @@ fn parse_line(line: &str) -> (&str, &str, &str) {
 struct Node {
     title: String,
     // TODO &str?
+    is_end: bool,
     left: Option<Rc<RefCell<Node>>>,
     right: Option<Rc<RefCell<Node>>>,
 }
 
 impl Node {
     pub fn new(title: &str) -> Self {
-        Self { title: title.to_string(), left: None, right: None }
+        Self { title: title.to_string(), is_end: title.ends_with('Z'), left: None, right: None }
     }
     pub fn set_children(&mut self, left: &Rc<RefCell<Node>>, right: &Rc<RefCell<Node>>) {
         self.left = Some(Rc::clone(left));
