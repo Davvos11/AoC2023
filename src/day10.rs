@@ -74,7 +74,7 @@ pub fn day10(input: &str) -> (isize, isize) {
     // Loop through every row from left to right
     for i in 0..height {
         let mut pipes_to_left = 0;
-        let mut pipe_pieces = Vec::new();
+        let mut pipe_pieces = vec![' ', ' '];
         for j in 0..width {
             let pipe = pipes.get(&(i, j)).unwrap();
             let pipe_type = pipe_types.get(&(i, j)).unwrap();
@@ -82,50 +82,33 @@ pub fn day10(input: &str) -> (isize, isize) {
             if *pipe_type == Main {
                 // If we encounter a main pipe, we flip our status
                 // (but not if it is part of a FJ or L7 edge case)
-                match pipe {
-                    PipePart(c, _) => {
-                        match c {
-                            '-' => {}
-                            &x @ ('L' | 'F' | '7' | 'J') => {
-                                pipe_pieces.push(x);
-                                let last_corners = pipe_pieces.iter().rev().take(2).rev().collect::<String>();
-                                match last_corners.as_str() {
-                                    "FJ" => {}
-                                    "LJ" => { pipes_to_left += 1; }
-                                    "L7" => {}
-                                    "F7" => { pipes_to_left += 1; }
-                                    &_ => { pipes_to_left += 1; }
-                                };
-                            }
-                            '|' => {
-                                pipe_pieces.push('|');
-                                pipes_to_left += 1;
-                            }
-                            &_ => {
-                                panic!("Unknown pipe")
-                            }
+                if let PipePart(c, _) = pipe {
+                    match c {
+                        &c @ ('L' | 'F' | '7' | 'J' | '|') => {
+                            pipe_pieces.push(c);
+                            pipe_pieces.remove(0);
+                            match pipe_pieces[..] {
+                                ['F', 'J'] => {}
+                                ['L', 'J'] => { pipes_to_left += 1; }
+                                ['L', '7'] => {}
+                                ['F', '7'] => { pipes_to_left += 1; }
+                                _ => { pipes_to_left += 1; }
+                            };
                         }
+                        '-' => {}
+                        &_ => panic!("Unknown pipe"),
                     }
-                    StartPipe => {
-                        panic!("Start pipe should be replaced by now")
-                    }
-                    Ground => {}
                 }
             } else {
-                let location = if pipes_to_left % 2 == 0 {
-                    Outside
-                } else {
-                    Inside
-                };
+                let location =
+                    if pipes_to_left % 2 == 0 { Outside } else { Inside };
 
                 pipe_types.insert((i, j), location);
             }
         }
     }
 
-    let inside: HashMap<_, _> = pipe_types.iter().filter(|&(_, p)| *p == Inside).collect();
-    // dbg!(&inside.keys());
-    let result2 = inside.len();
+    let result2 = pipe_types.values().filter(|&p| *p == Inside).count();
 
     (result1, result2 as isize)
 }
@@ -153,7 +136,7 @@ fn get_type(mut neighbours: [(i32, i32); 2]) -> Pipe {
         [(-1, 0), (0, -1)] => 'J',
         [(0, -1), (1, 0)] => '7',
         [(0, 1), (1, 0)] => 'F',
-        _ => {panic!("Invalid pipe")}
+        _ => { panic!("Invalid pipe") }
     };
     PipePart(char, neighbours)
 }
