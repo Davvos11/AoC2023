@@ -41,7 +41,7 @@ const DAYS: [Day; 12] = [
     (day08, "static/input08.txt"),
     (day09, "static/input09.txt"),
     (day10, "static/input10.txt"),
-    (day11, "static/day11.txt"),
+    (day11, "static/input11.txt"),
     (day12, "static/example12.txt"),
 ];
 
