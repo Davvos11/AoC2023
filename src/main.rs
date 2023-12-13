@@ -42,7 +42,7 @@ const DAYS: [Day; 12] = [
     (day09, "static/input09.txt"),
     (day10, "static/input10.txt"),
     (day11, "static/input11.txt"),
-    (day12, "static/example12.txt"),
+    (day12, "static/input12.txt"),
 ];
 
 fn main() {
