@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 pub fn day12(input: &str) -> (isize, isize) {
     let mut result1 = 0;
     let mut result2 = 0;
@@ -10,7 +12,8 @@ pub fn day12(input: &str) -> (isize, isize) {
         let groups: Vec<usize> = split.next().unwrap().split(',')
             .map(|c| c.parse().unwrap()).collect();
 
-        let x = count_possible(chars_1, &groups, 0);
+        let mut memo = Memo::new();
+        let x = memo.count_possible(chars_1, &groups, 0, 0);
         // println!("1: {x}");
         result1 += x;
 
@@ -24,72 +27,93 @@ pub fn day12(input: &str) -> (isize, isize) {
         let groups_2: Vec<_> = (0..5)
             .flat_map(|_| groups.clone()).collect();
 
-        let y = count_possible(chars_2, &groups_2, 0);
+        let y = memo.count_possible(chars_2, &groups_2, 0, 0);
         result2 += y;
     }
 
     (result1 as isize, result2 as isize)
 }
 
-fn count_possible(chars: Vec<char>, groups: &[usize], i: usize) -> u64 {
-    let mut count = 0;
-    if let Some(&char) = chars.get(i) {
-        match char {
-            '?' => {
-                let mut new_chars = chars.clone();
-                new_chars[i] = '#';
-                count += count_possible(new_chars.clone(), groups, i);
-                new_chars[i] = '.';
-                count += count_possible(new_chars, groups, i);
-                return count;
-            }
-            '.' => {
-                // If we just finished a group:
-                if i > 0 {
-                    if let Some(&'#') = chars.get(i - 1) {
-                        // Check if this group complies with the next needed group
-                        let group_length = last_group_length(&chars[0..i]);
-                        if group_length == *groups.first().unwrap() {
-                            // Found a matching group! Continue with the next groups
-                            return count_possible(chars, &groups[1..], i + 1);
-                        } else {
+struct Memo<'a> {
+    memo: HashMap<(Vec<char>, &'a [usize], usize), u64>,
+}
+
+impl<'a> Memo<'a> {
+    fn new() -> Self {
+        Self {
+            memo: HashMap::new(),
+        }
+    }
+
+    fn count_possible(&mut self, chars: Vec<char>, groups: &'a [usize], i: usize, current_group: usize) -> u64 {
+        let chars_from = Vec::from(&chars[i..]);
+        // Lookup branch
+        if let Some(&result) = self.memo.get(&(chars_from.clone(), groups, current_group)) {
+            return result;
+        }
+
+        // If not found in memo, calculate the result
+        let calculate = || {
+            let mut count = 0;
+            let mut current_group = current_group;
+            if let Some(&char) = chars.get(i) {
+                match char {
+                    '?' => {
+                        let mut new_chars = chars.clone();
+                        new_chars[i] = '#';
+                        count += self.count_possible(new_chars.clone(), groups, i, current_group);
+                        new_chars[i] = '.';
+                        count += self.count_possible(new_chars, groups, i, current_group);
+                        return count;
+                    }
+                    '.' => {
+                        // If we just finished a group:
+                        if i > 0 {
+                            if let Some(&'#') = chars.get(i - 1) {
+                                // Check if this group complies with the next needed group
+                                return if current_group == *groups.first().unwrap() {
+                                    // Found a matching group! Continue with the next groups
+                                    self.count_possible(chars, &groups[1..], i + 1, 0)
+                                } else {
+                                    // Not possible, backtrack
+                                    0
+                                }
+                            }
+                        }
+                    }
+                    '#' => {
+                        // Check if the group we are forming is not too big
+                        current_group += 1;
+                        if groups.is_empty() || current_group > *groups.first().unwrap() {
                             // Not possible, backtrack
                             return 0;
                         }
                     }
+                    _ => { panic!("") }
                 }
-            }
-            '#' => {
-                // Check if the group we are forming is not too big
-                let group_length = last_group_length(&chars[0..=i]);
-                if groups.is_empty() || group_length > *groups.first().unwrap() {
+            } else {
+                // End of row, check if the last group formed is big enough
+                return if groups.len() > 1 {
                     // Not possible, backtrack
-                    return 0;
+                    0
+                } else if groups.is_empty() ||
+                    groups.len() == 1 && current_group == *groups.first().unwrap() {
+                    // Found a matching group or no group when not needed! Possible!
+                    // println!("{:?}", chars);
+                    1
+                } else {
+                    // Not possible, backtrack
+                    0
                 }
             }
-            _ => {panic!("")}
-        }
-    } else {
-        // End of row, check if the last group formed is big enough
-        let group_length = last_group_length(&chars[0..i]);
-        if groups.len() > 1 {
-            // Not possible, backtrack
-            return 0;
-        } else if groups.is_empty() ||
-            groups.len() == 1 && group_length == *groups.first().unwrap() {
-            // Found a matching group or no group when not needed! Possible!
-            // println!("{:?}", chars);
-            return 1;
-        } else {
-            // Not possible, backtrack
-            return 0;
-        }
+
+            // Continue to next character
+            self.count_possible(chars, groups, i + 1, current_group)
+        };
+
+        // Save and return result
+        let result = calculate();
+        self.memo.insert((chars_from, groups, current_group), result);
+        result
     }
-
-    // Continue to next character
-    return count_possible(chars, groups, i + 1);
-}
-
-fn last_group_length(chars: &[char]) -> usize {
-    chars.iter().rev().take_while(|&c|*c=='#').count()
 }
