@@ -13,6 +13,7 @@ use crate::day09::day09;
 use crate::day10::day10;
 use crate::day11::day11;
 use crate::day12::day12;
+use crate::day13::day13;
 
 mod utils;
 mod day01;
@@ -27,10 +28,11 @@ mod day09;
 mod day10;
 mod day11;
 mod day12;
+mod day13;
 
 type Day = (fn(&str) -> (isize, isize), &'static str);
 
-const DAYS: [Day; 12] = [
+const DAYS: [Day; 13] = [
     (day01, "static/input01.txt"),
     (day02, "static/input02.txt"),
     (day03, "static/input03.txt"),
@@ -43,6 +45,7 @@ const DAYS: [Day; 12] = [
     (day10, "static/input10.txt"),
     (day11, "static/input11.txt"),
     (day12, "static/input12.txt"),
+    (day13, "static/input13.txt"),
 ];
 
 fn main() {
