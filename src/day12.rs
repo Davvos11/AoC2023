@@ -1,10 +1,15 @@
 use std::collections::HashMap;
 
+// TODO can probably be more efficient if:
+//  memoization is initialised outside of the loop (use Vec<usize> for groups instead of &[usize])
+//  store and get characters from memo ignoring leading ...
+//  early return if sum(groups) > sum(#) + sum(?) - len(groups) + 1
+
 pub fn day12(input: &str) -> (isize, isize) {
     let mut result1 = 0;
     let mut result2 = 0;
 
-    for (i, line) in input.lines().enumerate() {
+    for line in input.lines() {
         let mut split = line.split_whitespace();
         let chars = split.next().unwrap().chars();
         // Part 1
@@ -14,7 +19,6 @@ pub fn day12(input: &str) -> (isize, isize) {
 
         let mut memo = Memo::new();
         let x = memo.count_possible(chars_1, &groups, 0, 0);
-        // println!("1: {x}");
         result1 += x;
 
         // Part 2
@@ -99,7 +103,6 @@ impl<'a> Memo<'a> {
                 } else if groups.is_empty() ||
                     groups.len() == 1 && current_group == *groups.first().unwrap() {
                     // Found a matching group or no group when not needed! Possible!
-                    // println!("{:?}", chars);
                     1
                 } else {
                     // Not possible, backtrack
