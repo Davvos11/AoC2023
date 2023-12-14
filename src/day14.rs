@@ -55,7 +55,6 @@ impl Pattern {
             if i >= 5 && i % 5 == 0 {
                 let slope = initial[i] as isize - initial[i-5] as isize;
                 if -5 < slope {
-                    dbg!(i);
                     break;
                 }
             }
