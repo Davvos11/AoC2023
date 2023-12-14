@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{HashMap};
 use std::hash::Hash;
 use Rock::*;
 
@@ -8,7 +8,7 @@ pub fn day14(input: &str) -> (isize, isize) {
 
     // Parse rocks
     // rocks[col, row] = rock
-    let mut rocks = BTreeMap::new();
+    let mut rocks = HashMap::new();
     for (i, line) in input.lines().enumerate() {
         for (j, char) in line.chars().enumerate() {
             let rock = match char {
@@ -22,11 +22,12 @@ pub fn day14(input: &str) -> (isize, isize) {
     }
 
 
+    // Part 1
     rocks = tilt(&rocks, cols, rows);
     let result1 = get_load(&rocks, rows);
 
+    // Part 2
     let pattern = Pattern::new(rocks, cols, rows);
-
     let result2 = pattern.get(1000000000 - 1);
 
     (result1 as isize, result2 as isize)
@@ -43,7 +44,7 @@ impl Pattern {
     /// The result keeps (mostly) lowering until it reaches a pattern
     /// see: https://i.imgur.com/w0q3ztl.png
     /// This function will provide that pattern
-    fn new(rocks: BTreeMap<(usize, usize), Rock>, cols: usize, rows: usize) -> Self {
+    fn new(rocks: HashMap<(usize, usize), Rock>, cols: usize, rows: usize) -> Self {
         let mut initial = Vec::new();
         let mut pattern = Vec::new();
         let mut rocks = rocks;
@@ -59,15 +60,17 @@ impl Pattern {
                 }
             }
         }
-        // Calculate a large number of times
+
         let mut buffer = Vec::new();
-        for _ in 0..100 {
-            rocks = cycle(rocks, cols, rows);
-            buffer.push(get_load(&rocks, rows));
-        }
         // Try to find the pattern
         for window_size in 1.. {
-            if window_size > 50 { panic!("Could not find") }
+            // Add new values
+            for _ in 0..2 {
+                rocks = cycle(rocks, cols, rows);
+                buffer.push(get_load(&rocks, rows));
+            }
+            if window_size % 50 == 0 { println!("Warning: window size > {window_size}") }
+
             let mut windows = buffer.chunks_exact(window_size);
             if let Some(first) = windows.next() {
                 let mut repeats = false;
@@ -101,27 +104,23 @@ impl Pattern {
     }
 }
 
-fn get_load(rocks: &BTreeMap<(usize, usize), Rock>, rows: usize) -> usize {
-    rocks.iter().filter_map(|((j, i), &rock)| {
+fn get_load(rocks: &HashMap<(usize, usize), Rock>, rows: usize) -> usize {
+    rocks.iter().filter_map(|((_, i), &rock)| {
         if rock == Round { Some(rows - i) } else { None }
     }).sum()
 }
 
-fn cycle(rocks: BTreeMap<(usize, usize), Rock>, cols: usize, rows: usize) -> BTreeMap<(usize, usize), Rock> {
+fn cycle(rocks: HashMap<(usize, usize), Rock>, mut cols: usize, mut rows: usize) -> HashMap<(usize, usize), Rock> {
     let mut rocks = rocks;
-
-    rocks = tilt(&rocks, cols, rows);
-    rocks = rotate(&rocks, cols);
-    rocks = tilt(&rocks, cols, rows);
-    rocks = rotate(&rocks, rows);
-    rocks = tilt(&rocks, cols, rows);
-    rocks = rotate(&rocks, cols);
-    rocks = tilt(&rocks, cols, rows);
-    rocks = rotate(&rocks, rows);
+    for _ in 0..4 {
+        rocks = tilt(&rocks, cols, rows);
+        rocks = rotate(&rocks, cols);
+        (cols, rows) = (rows, cols);
+    }
     rocks
 }
 
-fn tilt(rocks: &BTreeMap<(usize, usize), Rock>, width: usize, height: usize) -> BTreeMap<(usize, usize), Rock> {
+fn tilt(rocks: &HashMap<(usize, usize), Rock>, width: usize, height: usize) -> HashMap<(usize, usize), Rock> {
     let mut rocks = rocks.clone();
 
     for c in 0..width {
@@ -147,7 +146,7 @@ fn tilt(rocks: &BTreeMap<(usize, usize), Rock>, width: usize, height: usize) -> 
     rocks
 }
 
-fn rotate(map: &BTreeMap<(usize, usize), Rock>, cols: usize) -> BTreeMap<(usize, usize), Rock> {
+fn rotate(map: &HashMap<(usize, usize), Rock>, cols: usize) -> HashMap<(usize, usize), Rock> {
     map.iter().map(|(&(i, j), &value)| {
         ((cols - 1 - j, i), value)
     }).collect()
